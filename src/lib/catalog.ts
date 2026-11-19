@@ -121,6 +121,14 @@ export async function runDropIfDue(): Promise<number> {
       set: { value: new Date().toISOString(), updatedAt: new Date() },
     });
 
+  await db
+    .insert(siteMeta)
+    .values({ key: "last_ping_at", value: new Date().toISOString() })
+    .onConflictDoUpdate({
+      target: siteMeta.key,
+      set: { value: new Date().toISOString(), updatedAt: new Date() },
+    });
+
   return fresh.length;
 }
 
