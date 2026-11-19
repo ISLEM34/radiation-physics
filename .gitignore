@@ -1,0 +1,23 @@
+# البناء
+node_modules/
+.next/
+out/
+build/
+
+# المتغيرات السرية — لا تُرفع أبدًا
+.env
+.env.*
+!.env.example
+
+# السجلات والمؤقتات
+*.log
+npm-debug.log*
+tmp/
+.cache/
+
+# أدوات النظام
+.DS_Store
+.idea/
+.vscode/
+*.tsbuildinfo
+next-env.d.ts
