@@ -80,11 +80,30 @@ npm run build && npm run start        # شغّله خلف systemd/pm2 ليبقى
 
 ## الخيار 3 — استضافة Serverless (Vercel + Neon / Supabase)
 
-1. ارفع المستودع إلى GitHub ثم استورده في Vercel.
-2. أنشئ قاعدة **Neon** أو **Supabase** وانسخ `DATABASE_URL`.
-3. في Vercel: أضف المتغير `DATABASE_URL` (+ `SESSION_SECRET`) للإنتاج.
-4. أمر البناء: `npx drizzle-kit push && npx next build` — أو نفّذ `npx drizzle-kit push` مرة واحدة عبر `vercel env pull` + سكربت.
-5. Deploy.
+**التوصية المجانية الدائمة (بلا بطاقة وبلا انتهاء صلاحية):**
+
+### أ. القاعدة — Neon (مجاني، دائم)
+1. افتح `neon.tech` → سجّل بالـGitHub → **New Project**.
+2. اختر أقرب منطقة → اترك الاسم الافتراضي → **Create**.
+3. انسخ **Connection String** (تبدأ بـ`postgresql://...@...neon.tech/...?sslmode=require`).
+
+### ب. الاستضافة — Vercel (مجاني، دائم)
+1. `vercel.com/new` → **Import** مستودعك `ISLEM34/radiation-physics`.
+2. Vercel سيكتشف Next.js تلقائيًا — أمر البناء مُضبَّط في `vercel.json`:
+   `npx drizzle-kit push && npx next build`  ← **ينشئ الجداول في Neon أول بناء.**
+3. أضف **متغيرين** (Project Settings → Environment Variables → Production):
+   - `DATABASE_URL` = رابط Neon
+   - `SESSION_SECRET` = أي سلسلة عشوائية طويلة
+4. **Deploy** → انتهى.
+
+### ج. ما يحدث بعده تلقائيًا
+- **أول زيارة** → يُزرع الفهرس (167 مصدرًا) ويبدأ فحص الروابط.
+- **كل ساعة** → `Vercel Cron` يستدعي `/api/cron` (ساعة 0 من كل ساعة):
+  يُسقط 3 مراجع من الطابور + يفحص دفعة روابط → لن يتوقف السقوط حتى بلا خادم دائم.
+- **الفحص الدوري**: الروابط تُراجَع كل 6 ساعات، و404 تُعاد مراجعتها بعد 24 ساعة.
+
+> **بدون بطاقة** لكليهما، **بلا انتهاء صلاحية**، **بلا نوم** (Vercel serverless يرد فورًا).
+> حدود مجانية: Neon ≈ 0.5GB · Vercel Hobby ≈ 100GB نطاق + كفاءة دوال عالية — أكثر من كافٍ لهذا الموقع.
 
 **ملاحظات خاصة بالـserverless:**
 - المؤقّت الداخلي (كل دقيقة) لا يعمل والخادم مُجمَّد، لكن `runDropIfDue()` يفحص الفارق الزمني عند **كل طلب**، فتُسقط 3 مراجع جديدة فور أول زيارة بعد انقضاء ساعة — أي أن «الإضافة كل ساعة» تبقى تعمل حتى بلا خادم دائم.

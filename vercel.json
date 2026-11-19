@@ -1,0 +1,11 @@
+{
+  "buildCommand": "npx drizzle-kit push && npx next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "crons": [
+    {
+      "path": "/api/cron",
+      "schedule": "0 * * * *"
+    }
+  ]
+}
